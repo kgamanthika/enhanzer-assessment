@@ -1,0 +1,357 @@
+<div class="purchase-page">
+
+  <header class="topbar">
+
+    <div class="logo-area">
+      <div class="logo-icon">E</div>
+
+      <div>
+        <strong>Enhanzer</strong>
+        <span>Purchase Bill</span>
+      </div>
+    </div>
+
+    <button
+      class="logout-button"
+      type="button"
+      (click)="logout()"
+    >
+      Logout
+    </button>
+
+  </header>
+
+  <main class="content">
+
+    <div class="page-title">
+
+      <div>
+        <h1>Purchase Bill</h1>
+
+        <p>
+          Add items to your purchase bill
+        </p>
+      </div>
+
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert error-alert">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="alert success-alert">
+        {{ successMessage }}
+      </div>
+    }
+
+    <section class="main-layout">
+
+      <div class="form-card">
+
+        <div class="section-title">
+          <h2>Item Details</h2>
+        </div>
+
+        <form
+          [formGroup]="billForm"
+          (ngSubmit)="addItem()"
+        >
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>Item *</label>
+
+              <input
+                list="item-list"
+                formControlName="itemName"
+                placeholder="Select item"
+              />
+
+              <datalist id="item-list">
+                @for (item of items; track item) {
+                  <option [value]="item">
+                    {{ item }}
+                  </option>
+                }
+              </datalist>
+
+              @if (
+                billForm.controls.itemName.invalid &&
+                billForm.controls.itemName.touched
+              ) {
+                <small>
+                  Item is required.
+                </small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label>Batch *</label>
+
+              <select
+                formControlName="batchName"
+              >
+
+                <option value="">
+                  {{ loadingLocations
+                    ? 'Loading locations...'
+                    : 'Select location' }}
+                </option>
+
+                @for (
+                  location of locations;
+                  track location.locationCode
+                ) {
+                  <option
+                    [value]="location.locationName"
+                  >
+                    {{ location.locationName }}
+                  </option>
+                }
+
+              </select>
+
+              @if (
+                billForm.controls.batchName.invalid &&
+                billForm.controls.batchName.touched
+              ) {
+                <small>
+                  Batch is required.
+                </small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label>Standard Cost *</label>
+
+              <input
+                type="number"
+                min="0.01"
+                formControlName="standardCost"
+              />
+
+            </div>
+
+            <div class="field">
+
+              <label>Standard Price *</label>
+
+              <input
+                type="number"
+                min="0.01"
+                formControlName="standardPrice"
+              />
+
+            </div>
+
+            <div class="field">
+
+              <label>Quantity *</label>
+
+              <input
+                type="number"
+                min="1"
+                formControlName="quantity"
+              />
+
+            </div>
+
+            <div class="field">
+
+              <label>Discount (%)</label>
+
+              <input
+                type="number"
+                min="0"
+                max="100"
+                formControlName="discountPercentage"
+              />
+
+            </div>
+
+          </div>
+
+          <div class="calculation-row">
+
+            <div>
+              <span>Total Cost</span>
+              <strong>
+                {{ calculateTotalCost() | number:'1.2-2' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Total Selling</span>
+              <strong>
+                {{ calculateTotalSelling() | number:'1.2-2' }}
+              </strong>
+            </div>
+
+            <button
+              type="submit"
+              class="add-button"
+              [disabled]="submitting"
+            >
+              {{ submitting ? 'Adding...' : 'ADD ITEM' }}
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      <aside class="summary-card">
+
+        <h2>Item Summary</h2>
+
+        <div class="summary-row">
+          <span>Total Items</span>
+          <strong>
+            {{ totalItems }}
+          </strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Total Quantity</span>
+          <strong>
+            {{ totalQuantity }}
+          </strong>
+        </div>
+
+        <hr />
+
+        <div class="summary-row">
+          <span>Total Cost</span>
+          <strong>
+            {{ totalCost | number:'1.2-2' }}
+          </strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Total Selling</span>
+          <strong>
+            {{ totalSelling | number:'1.2-2' }}
+          </strong>
+        </div>
+
+      </aside>
+
+    </section>
+
+    <section class="table-card">
+
+      <div class="section-title">
+        <h2>Items</h2>
+      </div>
+
+      @if (billItems.length === 0) {
+
+        <div class="empty-state">
+          No items have been added yet.
+        </div>
+
+      } @else {
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Batch</th>
+                <th>Standard Cost</th>
+                <th>Standard Price</th>
+                <th>Qty</th>
+                <th>Discount</th>
+                <th>Total Cost</th>
+                <th>Total Selling</th>
+                <th></th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (
+                item of billItems;
+                track $index
+              ) {
+
+                <tr>
+
+                  <td>
+                    {{ $index + 1 }}
+                  </td>
+
+                  <td>
+                    {{ item.itemName }}
+                  </td>
+
+                  <td>
+                    {{ item.batchName }}
+                  </td>
+
+                  <td>
+                    {{ item.standardCost | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    {{ item.standardPrice | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    {{ item.quantity }}
+                  </td>
+
+                  <td>
+                    {{ item.discountPercentage }}%
+                  </td>
+
+                  <td>
+                    {{ item.totalCost | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    {{ item.totalSelling | number:'1.2-2' }}
+                  </td>
+
+                  <td>
+                    <button
+                      class="remove-button"
+                      type="button"
+                      (click)="removeItem($index)"
+                    >
+                      Remove
+                    </button>
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      }
+
+    </section>
+
+  </main>
+
+</div>

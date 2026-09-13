@@ -1,0 +1,131 @@
+<div class="login-page">
+
+  <div class="login-card">
+
+    <div class="brand">
+      <div class="brand-mark">
+        E
+      </div>
+
+      <div>
+        <h1>Enhanzer</h1>
+        <p>Purchase Management</p>
+      </div>
+    </div>
+
+    <div class="login-content">
+
+      <h2>Hi</h2>
+
+      <p class="subtitle">
+        Sign in to continue
+      </p>
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="submit()"
+      >
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+          />
+
+          @if (email.invalid && email.touched) {
+            <small class="error">
+
+              @if (email.errors?.['required']) {
+                Email is required.
+              }
+
+              @if (email.errors?.['email']) {
+                Please enter a valid email.
+              }
+
+            </small>
+          }
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <div class="password-wrapper">
+
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+
+          </div>
+
+          @if (
+            password.invalid &&
+            password.touched
+          ) {
+            <small class="error">
+
+              @if (password.errors?.['required']) {
+                Password is required.
+              }
+
+              @if (password.errors?.['minlength']) {
+                Password must contain at least
+                4 characters.
+              }
+
+            </small>
+          }
+
+        </div>
+
+        @if (errorMessage) {
+          <div class="server-error">
+            {{ errorMessage }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="loading"
+        >
+
+          @if (loading) {
+            <span>Logging in...</span>
+          } @else {
+            <span>LOGIN</span>
+          }
+
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
