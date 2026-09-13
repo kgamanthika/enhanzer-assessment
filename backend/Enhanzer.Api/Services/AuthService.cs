@@ -45,9 +45,15 @@ public class AuthService : IAuthService
             }
         };
 
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = null
+        };
+
         using var response = await _httpClient.PostAsJsonAsync(
             ExternalApiUrl,
-            payload);
+            payload,
+            jsonOptions);
 
         var responseContent =
             await response.Content.ReadAsStringAsync();
